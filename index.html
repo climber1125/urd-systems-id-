@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>URD Systems ID Trainer</title>
+<style>
+:root{--bg:#f4f5f2;--card:#fff;--ink:#14181c;--mut:#5b636b;--line:#d9ddd8;--acc:#e8590c;--acc2:#1c6fd1;--ok:#1f8a4c;--bad:#c92a2a;--r:14px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 -apple-system,system-ui,Segoe UI,Roboto,sans-serif}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) calc(76px + env(safe-area-inset-bottom)) env(safe-area-inset-left)}
+header{padding:14px 16px 6px;display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+h1{font-size:19px;margin:0;letter-spacing:.2px}
+h1 span{color:var(--acc)}
+.prog{font-size:13px;color:var(--mut);white-space:nowrap}
+main{padding:8px 14px;max-width:760px;margin:0 auto}
+nav{position:fixed;left:0;right:0;bottom:0;background:#14181c;display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:20}
+nav button{flex:1;background:none;border:0;color:#aab2ba;padding:10px 0 12px;font-size:12px;font-weight:600}
+nav button b{display:block;font-size:20px;line-height:1.2}
+nav button.on{color:#fff;box-shadow:inset 0 3px 0 var(--acc)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.ph{background:#e9ebe7;display:flex;align-items:center;justify-content:center;height:46vh;max-height:420px;min-height:220px}
+.ph img{max-width:100%;max-height:100%;object-fit:contain}
+.ph .none{color:var(--mut);text-align:center;padding:20px}
+.body{padding:14px 16px}
+.num{display:inline-block;background:var(--acc);color:#fff;font-weight:700;border-radius:8px;padding:2px 9px;font-size:14px;margin-right:8px}
+.name{font-size:21px;font-weight:700;margin:6px 0}
+.fn{color:#2b3238;margin:6px 0 2px}
+.tip{color:var(--mut);font-size:14px;margin-top:8px;border-left:3px solid var(--acc2);padding-left:10px}
+.hint{color:var(--mut);font-size:14px;text-align:center;padding:16px}
+.row{display:flex;gap:10px;margin-top:12px}
+.btn{flex:1;border:0;border-radius:12px;padding:14px 10px;font-size:16px;font-weight:700;background:#dfe3de;color:var(--ink)}
+.btn.p{background:var(--acc);color:#fff}.btn.g{background:var(--ok);color:#fff}.btn.r{background:var(--bad);color:#fff}.btn.b{background:var(--acc2);color:#fff}
+.seg{display:flex;background:#e2e5e0;border-radius:12px;padding:4px;gap:4px;margin-bottom:12px}
+.seg button{flex:1;border:0;background:none;padding:9px 4px;border-radius:9px;font-weight:600;font-size:14px;color:var(--mut)}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px #0002}
+.opts{display:grid;gap:10px;margin-top:12px}
+.opt{text-align:left;border:2px solid var(--line);background:#fff;border-radius:12px;padding:13px 14px;font-size:16px;font-weight:600;color:var(--ink)}
+.opt.ok{border-color:var(--ok);background:#e6f5ec}.opt.bad{border-color:var(--bad);background:#fbeaea}
+.qtext{font-size:18px;font-weight:600;padding:16px}
+.score{display:flex;justify-content:space-between;font-size:14px;color:var(--mut);margin-bottom:8px}
+.board{position:relative;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);background:#ddd}
+.board img{display:block;width:100%}
+.hs{position:absolute;transform:translate(-50%,-50%);width:26px;height:26px;border-radius:50%;background:rgba(232,89,12,.88);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff;padding:0}
+.hs.hide{background:rgba(28,111,209,.85);font-size:0}
+.hs.ok{background:var(--ok)}.hs.bad{background:var(--bad)}
+.zoomwrap{overflow:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r)}
+.zoomwrap .board{width:200%}
+.panel{margin-top:12px}
+input[type=search]{width:100%;padding:13px 14px;font-size:16px;border:1px solid var(--line);border-radius:12px;margin-bottom:10px}
+.li{display:flex;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px;margin-bottom:8px}
+.li img,.li .np{width:64px;height:64px;object-fit:contain;background:#eceeea;border-radius:8px;flex:none}
+.li .np{display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--mut)}
+.li .t{font-weight:700}.li .d{font-size:13px;color:var(--mut)}
+.badge{font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;margin-left:6px;vertical-align:middle}
+.badge.k{background:#e6f5ec;color:var(--ok)}.badge.l{background:#fff1e6;color:var(--acc)}
+.small{font-size:13px;color:var(--mut)}
+.done{text-align:center;padding:24px 16px}
+.done .big{font-size:44px;font-weight:800;color:var(--acc)}
+body.testonly nav{display:none}body.testonly{padding-bottom:env(safe-area-inset-bottom)}
+body.intest nav{display:none}
+.bar{height:8px;background:#e2e5e0;border-radius:4px;overflow:hidden;margin-bottom:10px}.bar i{display:block;height:100%;background:var(--acc)}
+.opt.sel{border-color:var(--acc2);background:#e8f0fb}
+.res{font-family:ui-monospace,Menlo,monospace;font-size:13px;white-space:pre-wrap;background:#f1f3ef;border-radius:10px;padding:12px;margin-top:10px}
+.pf{font-size:28px;font-weight:800}
+textarea{width:100%;min-height:150px;font:13px ui-monospace,Menlo,monospace;padding:10px;border:1px solid var(--line);border-radius:10px}
+input.txt{width:100%;padding:14px;font-size:17px;border:1px solid var(--line);border-radius:12px;margin:8px 0}
+label.chk{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--mut);margin:4px 0 10px}
+</style>
+</head>
+<body>
+<header><h1>URD <span>Systems ID</span></h1><div class="prog" id="prog"></div></header>
+<main id="app"></main>
+<form name="test-results" data-netlify="true" netlify-honeypot="bot-field" hidden>
+  <input name="bot-field"><input name="student"><input name="date"><input name="score"><input name="percent"><input name="result"><input name="minutes"><input name="missed"><input name="check-code">
+</form>
+<nav>
+  <button data-v="cards" class="on"><b>🂠</b>Flashcards</button>
+  <button data-v="quiz"><b>✓</b>Quiz</button>
+  <button data-v="board"><b>▦</b>Board</button>
+  <button data-v="list"><b>☰</b>List</button>
+  <button data-v="test"><b>✎</b>Test</button>
+</nav>
+<script>
+// ===== EDIT ITEMS HERE: [number, name, what it does, field tip] =====
+const ITEMS = [
+ [1,"5/16 Allen Wrench","Hex key for set screws on secondary connector blocks and other URD hardware.","Snug set screws to spec — loose ones heat up and burn connections."],
+ [2,"Wire Brush","Cleans oxide and dirt off conductor strands before a connector goes on.","Brush aluminum right before connecting and apply inhibitor — oxide re-forms fast."],
+ [3,"Ratcheting Probe","Ratcheting T-handle tool used to drive and tighten the elbow probe into the connector.","Don't overtorque; a stripped or loose probe means a bad contact."],
+ [4,"Folding Rule","Measures cable prep dimensions — strip lengths, cutbacks and jacket removal.","Always measure against the manufacturer's kit instructions, not memory."],
+ [5,"Chamfering Tool","Bevels the edge of the primary insulation at the cutback.","A chamfer lets the elbow or splice slide on without tearing the stress cone."],
+ [6,"Banana Peeler","Removes the semi-con (insulation shield) in a spiral strip.","Set the blade depth so you don't score the insulation underneath."],
+ [7,"Secondary Insulation Stripper","Strips insulation off secondary (600 V) cable.","Don't nick strands — every cut strand reduces ampacity."],
+ [8,"Primary Insulation Stripper","Removes primary insulation to expose the conductor for the connector.","Square, clean cut to the exact length the connector needs."],
+ [9,"Semi-con Scoring Tool","Scores the semi-con layer at the cutback line so it can be removed cleanly.","Score only the semi-con — a cut in the insulation is a future failure point."],
+ [10,"MD-6 Squeeze Tool","Burndy MD-6 mechanical crimper for installing compression connectors with dies.","Match the die to the connector; crimp the full number of times called for."],
+ [11,"Die Tree","Holds and organizes the crimp dies for the MD-6.","Check the die marking matches the connector before every crimp."],
+ [12,"Probe Wrench (disposable)","Small hex wrench supplied with the elbow kit to tighten the probe.","Single use — it comes in the kit with each elbow."],
+ [13,"Cold Shrink (Shrink Tube)","Tube with a pull-out core that shrinks down to seal and insulate — no heat needed.","Position it before pulling the core; you get one shot."],
+ [14,"Penta Wrench","Five-sided socket for penta-head bolts that lock padmount transformer and switchgear doors.","Re-secure the penta bolt every time you leave the cabinet."],
+ [15,"Swivel","Goes between the pull rope and pulling sock so rope twist isn't transferred to the cable.","Never pull cable without one — twisting damages the cable."],
+ [16,"Wire Pulling Sock","Mesh grip that slides over the cable end to pull it through conduit.","Tape the tail end so it can't slip off mid-pull."],
+ [17,"Blow Sock","Parachute that's blown through conduit with compressed air to pull in a pull line or mule tape.","Also proves the conduit is open before you pull cable."],
+ [18,"Probe","Threaded contact pin in a loadbreak elbow; it inserts into the bushing insert. Has an arc-follower tip.","Inspect the arc-follower tip — a damaged one won't quench the arc."],
+ [19,"Phase Tape","Colored tape used to identify phases.","Tag/tape every phase at both ends of the run."],
+ [20,"9\" Lineman Pliers (Kleins)","General cutting, gripping and twisting.","Not a hammer. Keep them clean and oiled."],
+ [21,"Needle Nose Pliers","Fine gripping and bending in tight spaces.","Good for set-screw work and small hardware."],
+ [22,"Riser Pole Termination (Pothead)","Terminates the underground cable where it rises up the pole to connect to overhead.","Stress control and skirts prevent tracking and flashover at the transition."],
+ [23,"Feed-Thru Bushing","Gives multiple loadbreak interfaces on one bushing so a circuit can be fed through or tapped.","Mounts on a parking bracket; uncovered interfaces get an insulated cap."],
+ [24,"Load Break Elbow","200 A connector that makes and breaks an energized circuit under load with a hot stick.","Hot stick only, firm fast motion. Check the rating before operating."],
+ [25,"Surge Arresting Elbow","Elbow with a built-in arrester, used at open points and ends of line to protect cable from surges.","Ground lead must be connected or it can't protect anything."],
+ [26,"Meter Seal","Tamper seal on a meter or meter base.","A broken seal means the meter was tampered with or accessed — document it."],
+ [27,"Riser Pole Termination Bracket","Mounts the terminations (and arresters) on the riser pole.","Keep proper spacing between phases and ground."],
+ [28,"Cable Tag","Identifies a cable — circuit, phase and direction.","Untagged cable is a hazard to the next crew."],
+ [29,"Copper Top or Lug","Compression connector that attaches the conductor to a stud or hardware.","Crimp with the correct die; clean contact surfaces."],
+ [30,"Mastic Tape","Sealing compound tape used to keep moisture out of terminations and splices.","Moisture ingress is the #1 killer of URD connections."],
+ [31,"Grounding Elbow","Elbow with a ground lead that grounds a de-energized cable or bushing.","Test before you ground. Connect the ground lead first, remove it last."],
+ [32,"Primary Splice","Joins two primary cables together.","Prep is everything — dimensions, clean insulation, no voids."],
+ [33,"Transformer Grounding Clamp","Bonds the ground/neutral conductor to the transformer tank ground pad.","A poor ground means the tank can become energized."],
+ [34,"Ground Rod Clamp","Connects the ground wire to the ground rod.","Must be tight and corrosion-free."],
+ [35,"Parking Stand","Insulated bushing on a parking bracket used to safely park an energized elbow.","Lets you isolate an elbow without leaving it hanging."],
+ [36,"Secondary Flood Seal","Submersible insulated connector block for secondary connections.","Rated for wet pedestals and vaults — seal unused ports."],
+ [37,"Secondary Block (Z-Bar)","Bus bar with set-screw ports that ties secondary conductors together.","Tighten set screws to torque and use inhibitor on aluminum."],
+ [38,"Secondary Block Cover","Insulating cover that goes over the secondary block.","Keeps the energized Z-bar covered when the pedestal is open."],
+ [39,"Primary Bushing","Bushing (insert) where the elbow connects to the transformer or switchgear.","Keep the interface clean and lubricated with the supplied silicone."],
+ [40,"Dust Cap (Shipping Cap)","Protects a bushing or elbow from dirt and damage during shipping and storage.","NOT insulated — never leave one on an energized bushing. Use a dead end cap."],
+ [41,"Fault Indicator","Shows whether fault current passed through the cable, to help locate a faulted section.","Reset it after the fault is repaired."],
+ [42,"Dead End Cap","Insulated cap that seals and covers an unused bushing interface.","Rated insulation, unlike the dust cap. Grounding eye goes to ground."],
+ [43,"Ground Rod","Driven rod that provides the earth ground connection.","Drive it to full depth, clamp securely."]
+];
+// board hotspot positions (% of photo width/height)
+const POS={1:[3.5,23.3],2:[9,25.9],3:[14.5,27.4],4:[6.4,54.5],5:[13.6,45.2],6:[13.4,59],7:[7.2,77.8],8:[12.7,75.5],9:[18,78.8],10:[23.1,45.9],11:[28.2,33.3],12:[30.1,46.9],13:[32.5,60.7],14:[32,21],15:[34.9,36.9],16:[38.3,45.5],17:[42.2,30],18:[47,40],19:[45.9,50.9],20:[41.4,68.6],21:[44.9,62.2],22:[37.3,86.7],23:[51.8,25],24:[60.4,39.3],25:[54.1,69.1],26:[59.8,71],27:[65,25.2],28:[62.7,52.9],29:[63,64.3],30:[66.9,57],31:[73.6,39.7],32:[81.9,23.4],33:[81.9,37.4],34:[80.8,44.7],35:[81.4,64.8],36:[90.1,20.2],37:[89.7,34.7],38:[88.2,51.6],39:[89.1,64.8],41:[96.9,30.5],42:[95.9,61],43:[50.3,10.7]};
+
+const D=ITEMS.map(([n,name,fn,tip])=>({n,name,fn,tip,img:n in POS?`img/${n}.jpg`:null}));
+const byN=Object.fromEntries(D.map(d=>[d.n,d]));
+const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let known=new Set(store.get('urd_known',[]));
+const saveKnown=()=>{store.set('urd_known',[...known]);updProg()};
+const updProg=()=>document.getElementById('prog').textContent=`${known.size}/${D.length} known`;
+const shuf=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const app=document.getElementById('app');
+const photo=d=>d.img?`<img src="${d.img}" alt="Item ${d.n}">`:`<div class="none">No photo on the board<br><b>#${d.n}</b></div>`;
+const detail=d=>`<div><span class="num">#${d.n}</span>${known.has(d.n)?'<span class="badge k">KNOWN</span>':''}</div><div class="name">${esc(d.name)}</div><div class="fn">${esc(d.fn)}</div>${d.tip?`<div class="tip">${esc(d.tip)}</div>`:''}`;
+
+// ===== FLASHCARDS =====
+let C={deck:D.map(d=>d.n),i:0,flip:false,onlyLearning:false};
+function cards(){
+  let deck=C.onlyLearning?C.deck.filter(n=>!known.has(n)):C.deck;
+  if(!deck.length){app.innerHTML=`<div class="card done"><div class="big">✓</div><p>Every item is marked known.</p><button class="btn p" id="rs">Show all cards</button></div>`;document.getElementById('rs').onclick=()=>{C.onlyLearning=false;cards()};return}
+  if(C.i>=deck.length)C.i=0;
+  const d=byN[deck[C.i]];
+  app.innerHTML=`
+  <div class="seg"><button id="ord" class="${!C.sh?'on':''}">In order</button><button id="sh" class="${C.sh?'on':''}">Shuffled</button><button id="lrn" class="${C.onlyLearning?'on':''}">Still learning</button></div>
+  <div class="score"><span>Card ${C.i+1} of ${deck.length}</span><span>Tap card to flip</span></div>
+  <div class="card" id="fc"><div class="ph">${photo(d)}</div>
+   <div class="body">${C.flip?detail(d):`<div class="hint">What is this, and what does it do?</div>`}</div></div>
+  <div class="row"><button class="btn" id="pv">◀ Back</button>${C.flip?`<button class="btn r" id="no">Still learning</button><button class="btn g" id="yes">Got it</button>`:`<button class="btn p" id="fl">Flip</button>`}<button class="btn" id="nx">Next ▶</button></div>`;
+  const go=s=>{C.i=(C.i+s+deck.length)%deck.length;C.flip=false;cards()};
+  fc.onclick=()=>{C.flip=!C.flip;cards()};
+  pv.onclick=()=>go(-1);nx.onclick=()=>go(1);
+  if(C.flip){yes.onclick=()=>{known.add(d.n);saveKnown();C.onlyLearning?(C.flip=false,cards()):go(1)};no.onclick=()=>{known.delete(d.n);saveKnown();go(1)}}
+  else fl.onclick=()=>{C.flip=true;cards()};
+  ord.onclick=()=>{C.sh=false;C.deck=D.map(d=>d.n);C.i=0;C.flip=false;cards()};
+  sh.onclick=()=>{C.sh=true;C.deck=shuf(D.map(d=>d.n));C.i=0;C.flip=false;cards()};
+  lrn.onclick=()=>{C.onlyLearning=!C.onlyLearning;C.i=0;C.flip=false;cards()};
+}
+
+// ===== QUIZ =====
+let Q=null,qMode='photo';
+function newQuiz(mode,pool){
+  qMode=mode;
+  let base=pool||D.map(d=>d.n);
+  if(mode!=='fn')base=base.filter(n=>byN[n].img);
+  Q={qs:shuf(base),i:0,right:0,miss:[],ans:null,opts:null};
+}
+function quiz(){
+  if(!Q)newQuiz(qMode);
+  const head=`<div class="seg"><button data-m="photo" class="${qMode==='photo'?'on':''}">Photo → Name</button><button data-m="fn" class="${qMode==='fn'?'on':''}">Job → Name</button><button data-m="name" class="${qMode==='name'?'on':''}">Name → Photo</button></div>`;
+  if(Q.i>=Q.qs.length){
+    const pct=Math.round(Q.right/Q.qs.length*100);
+    app.innerHTML=head+`<div class="card done"><div class="big">${pct}%</div><p>${Q.right} of ${Q.qs.length} correct</p>
+    ${Q.miss.length?`<p class="small">Missed: ${Q.miss.map(n=>'#'+n+' '+esc(byN[n].name)).join(', ')}</p>`:'<p>Perfect run.</p>'}
+    <div class="row">${Q.miss.length?`<button class="btn r" id="rm">Retry missed</button>`:''}<button class="btn p" id="ag">New quiz</button></div></div>`;
+    if(Q.miss.length)rm.onclick=()=>{newQuiz(qMode,Q.miss);quiz()};
+    ag.onclick=()=>{newQuiz(qMode);quiz()};
+    bindSeg();return;
+  }
+  const d=byN[Q.qs[Q.i]];
+  if(!Q.opts){const pool=D.filter(x=>x.n!==d.n&&(qMode!=='name'||x.img));Q.opts=shuf([d,...shuf(pool).slice(0,3)])}
+  let prompt='';
+  if(qMode==='photo')prompt=`<div class="ph">${photo(d)}</div><div class="qtext">What is this?</div>`;
+  else if(qMode==='fn')prompt=`<div class="qtext">Which item does this?<br><span style="font-weight:400">“${esc(d.fn)}”</span></div>`;
+  else prompt=`<div class="qtext">Which one is the <b>${esc(d.name)}</b>?</div>`;
+  let opts;
+  if(qMode==='name'){
+    opts=`<div class="opts" style="grid-template-columns:1fr 1fr">${Q.opts.map(o=>{let c='';if(Q.ans!=null){if(o.n===d.n)c='ok';else if(o.n===Q.ans)c='bad'}return `<button class="opt ${c}" data-n="${o.n}" style="padding:6px;height:150px;display:flex;align-items:center;justify-content:center;background:${c?'':'#eceeea'}"><img src="${o.img}" style="max-width:100%;max-height:100%;object-fit:contain"></button>`}).join('')}</div>`;
+  }else{
+    opts=`<div class="opts">${Q.opts.map(o=>{let c='';if(Q.ans!=null){if(o.n===d.n)c='ok';else if(o.n===Q.ans)c='bad'}return `<button class="opt ${c}" data-n="${o.n}">${esc(o.name)}</button>`}).join('')}</div>`;
+  }
+  app.innerHTML=head+`<div class="score"><span>Question ${Q.i+1} of ${Q.qs.length}</span><span>Score ${Q.right}</span></div>
+  <div class="card">${prompt}</div>${opts}
+  ${Q.ans!=null?`<div class="card panel"><div class="body">${detail(d)}</div></div><div class="row"><button class="btn p" id="nq">Next ▶</button></div>`:''}`;
+  bindSeg();
+  if(Q.ans==null)app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+    Q.ans=+b.dataset.n;
+    if(Q.ans===d.n){Q.right++;known.add(d.n)}else{Q.miss.push(d.n);known.delete(d.n)}
+    saveKnown();quiz();window.scrollTo(0,document.body.scrollHeight)});
+  else nq.onclick=()=>{Q.i++;Q.ans=null;Q.opts=null;quiz();window.scrollTo(0,0)};
+}
+function bindSeg(){app.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{newQuiz(b.dataset.m);quiz()})}
+
+// ===== BOARD =====
+let B={mode:'explore',sel:null,zoom:false,target:null,res:null,right:0,tries:0,hideNums:false};
+function board(){
+  const ns=Object.keys(POS).map(Number);
+  if(B.mode==='find'&&!B.target)B.target=shuf(ns)[0];
+  const hs=ns.map(n=>{let c='';if(B.mode==='find'){c='hide';if(B.res&&n===B.target)c='ok';else if(B.res&&n===B.res.pick&&!B.res.ok)c='bad'}else if(B.hideNums)c='hide';
+    return `<button class="hs ${c}" data-n="${n}" style="left:${POS[n][0]}%;top:${POS[n][1]}%">${n}</button>`}).join('');
+  let panel='';
+  if(B.mode==='explore')panel=B.sel?`<div class="card panel"><div class="ph" style="height:30vh">${photo(byN[B.sel])}</div><div class="body">${detail(byN[B.sel])}</div></div>`:`<div class="hint">Tap any dot to see what it is.</div>`;
+  else{const t=byN[B.target];
+    panel=`<div class="card panel"><div class="body"><div class="score" style="margin:0"><span>Find it on the board</span><span>${B.right}/${B.tries}</span></div><div class="name">${esc(t.name)}</div>
+    ${B.res?`<div style="font-weight:700;color:${B.res.ok?'var(--ok)':'var(--bad)'}">${B.res.ok?'Correct':'Not that one — it\'s #'+t.n}</div><div class="fn">${esc(t.fn)}</div><div class="row"><button class="btn p" id="nf">Next ▶</button></div>`:'<div class="small">Tap the dot where this item hangs.</div>'}</div></div>`}
+  app.innerHTML=`<div class="seg"><button id="ex" class="${B.mode==='explore'?'on':''}">Explore</button><button id="fd" class="${B.mode==='find'?'on':''}">Find it</button><button id="zm" class="${B.zoom?'on':''}">${B.zoom?'Zoom out':'Zoom in'}</button></div>
+  ${B.mode==='explore'?`<label class="chk"><input type="checkbox" id="hn" ${B.hideNums?'checked':''}> Hide numbers</label>`:''}
+  ${B.mode==='find'?panel:''}
+  <div class="${B.zoom?'zoomwrap':''}"><div class="board"><img src="img/board.jpg" alt="URD board">${hs}</div></div>
+  ${B.mode==='explore'?panel:''}`;
+  ex.onclick=()=>{B.mode='explore';B.sel=null;board()};
+  fd.onclick=()=>{B.mode='find';B.target=null;B.res=null;B.right=0;B.tries=0;board()};
+  zm.onclick=()=>{B.zoom=!B.zoom;board()};
+  if(B.mode==='explore')hn.onchange=e=>{B.hideNums=e.target.checked;board()};
+  app.querySelectorAll('.hs').forEach(b=>b.onclick=()=>{const n=+b.dataset.n;
+    if(B.mode==='explore'){B.sel=n;board();document.querySelector('.panel')?.scrollIntoView({behavior:'smooth',block:'nearest'})}
+    else if(!B.res){const ok=n===B.target;B.tries++;if(ok)B.right++;B.res={pick:n,ok};board()}});
+  if(B.mode==='find'&&B.res)nf.onclick=()=>{B.target=shuf(ns.filter(n=>n!==B.target))[0];B.res=null;board()};
+}
+
+// ===== LIST =====
+let L='';
+function list(){
+  app.innerHTML=`<input type="search" id="q" placeholder="Search name, number, or job…" value="${esc(L)}">
+  <div id="rows"></div><div class="row"><button class="btn" id="rk">Reset progress</button></div>
+  <p class="small" style="text-align:center">Progress saves on this device only.</p>`;
+  const draw=()=>{const s=L.toLowerCase();rows.innerHTML=D.filter(d=>!s||(d.n+' '+d.name+' '+d.fn).toLowerCase().includes(s)).map(d=>`
+    <div class="li">${d.img?`<img src="${d.img}" loading="lazy">`:'<div class="np">no photo</div>'}<div><div class="t">#${d.n} ${esc(d.name)}${known.has(d.n)?'<span class="badge k">KNOWN</span>':''}</div><div class="d">${esc(d.fn)}</div></div></div>`).join('')};
+  draw();q.oninput=e=>{L=e.target.value;draw()};
+  let arm=false;rk.onclick=()=>{if(!arm){arm=true;rk.textContent='Tap again to confirm';rk.classList.add('r');return}known.clear();saveKnown();list()};
+}
+
+// ===== TEST =====
+// questions: how many items (43 = whole board). type: 'mixed' | 'photo' | 'fn'. minutes: 0 = no time limit.
+const TEST={questions:43,type:'mixed',pass:80,minutes:30,showMissed:true};
+const SALT='NLC-URD-ID';
+const fnv=s=>{let h=0x811c9dc5;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,0x01000193)>>>0}return h.toString(36).toUpperCase().padStart(7,'0').slice(-7)};
+const canon=(name,date,right,total,missed)=>`${SALT}|${name.trim().toLowerCase()}|${date}|${right}/${total}|${[...missed].sort((a,b)=>a-b).join(',')}`;
+let T=store.get('urd_test',null),tick=null,armSubmit=false;
+const saveT=()=>store.set('urd_test',T);
+function buildTest(name){
+  const ns=shuf(D.map(d=>d.n)).slice(0,Math.min(TEST.questions,D.length));
+  const qs=ns.map(n=>{let t=TEST.type;if(t==='mixed')t=byN[n].img&&Math.random()<.65?'photo':'fn';if(t==='photo'&&!byN[n].img)t='fn';
+    return {n,t,opts:shuf([n,...shuf(D.filter(x=>x.n!==n).map(x=>x.n)).slice(0,3)]),pick:null}});
+  T={name:name.trim(),qs,i:0,start:Date.now(),done:false};saveT();
+}
+function timeLeft(){return TEST.minutes?Math.max(0,TEST.minutes*60000-(Date.now()-T.start)):null}
+const fmt=ms=>{const s=Math.ceil(ms/1000);return `${s/60|0}:${String(s%60).padStart(2,'0')}`};
+function finishTest(){
+  clearInterval(tick);tick=null;
+  const right=T.qs.filter(q=>q.pick===q.n).length,total=T.qs.length;
+  const missed=T.qs.filter(q=>q.pick!==q.n).map(q=>q.n);
+  const date=new Date().toLocaleString('en-US',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+  const mins=Math.round((Date.now()-T.start)/60000);
+  T.done=true;T.result={right,total,missed,date,mins,code:fnv(canon(T.name,date,right,total,missed)),timedOut:TEST.minutes&&timeLeft()===0};
+  saveT();submitResult();test();
+}
+async function submitResult(){
+  if(!T||!T.result||T.result.sent)return;
+  const r=T.result,pct=Math.round(r.right/r.total*100);
+  const body=new URLSearchParams({'form-name':'test-results',student:T.name,date:r.date,score:`${r.right}/${r.total}`,percent:pct+'%',
+    result:pct>=TEST.pass?'PASS':'FAIL',minutes:String(r.mins),missed:r.missed.map(n=>'#'+n+' '+byN[n].name).join('; ')||'none','check-code':r.code});
+  try{const res=await fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body.toString()});
+    r.sent=res.ok;r.sendFail=!res.ok}catch(e){r.sendFail=true}
+  saveT();const el=document.getElementById('sendst');if(el)el.innerHTML=sendStatus();
+}
+const sendStatus=()=>T.result.sent?'<span style="color:var(--ok)">✓ Sent to your instructor</span>'
+  :T.result.sendFail?'<span style="color:var(--bad)">Not sent (no signal?) </span><button class="btn b" id="rs2" style="flex:none;padding:6px 12px;font-size:14px">Retry</button>':'Sending to instructor…';
+function resultText(){
+  const r=T.result,pct=Math.round(r.right/r.total*100);
+  return `URD SYSTEMS ID TEST
+Name: ${T.name}
+Date: ${r.date}
+Score: ${r.right}/${r.total} (${pct}%) ${pct>=TEST.pass?'PASS':'FAIL'}
+Time: ${r.mins} min${r.timedOut?' (time ran out)':''}
+Missed: ${r.missed.length?r.missed.map(n=>'#'+n+' '+byN[n].name).join('; '):'none'}
+Check code: ${r.code}`;
+}
+function test(){
+  document.body.classList.toggle('intest',!!(T&&!T.done));
+  // start screen
+  if(!T||(T.done&&T.ack)){
+    app.innerHTML=`<div class="card"><div class="body">
+      <div class="name">URD Systems ID Test</div>
+      <p class="fn">${Math.min(TEST.questions,D.length)} questions · ${TEST.minutes?TEST.minutes+' minute limit':'no time limit'} · ${TEST.pass}% to pass</p>
+      <p class="small">No hints, no going back, no answers shown until the end. Pick an answer, then tap Next.</p>
+      <input class="txt" id="nm" placeholder="Your full name" autocomplete="name">
+      <button class="btn p" id="go" style="width:100%">Begin test</button></div></div>
+      <details class="card panel"><summary class="body" style="font-weight:700">Instructor: verify a result</summary><div class="body" style="padding-top:0">
+      <p class="small">Paste the results text a student sent you.</p><textarea id="vt"></textarea>
+      <button class="btn b" id="vb" style="width:100%;margin-top:8px">Check</button><div id="vr" style="margin-top:10px;font-weight:700"></div></div></details>`;
+    go.onclick=()=>{if(!nm.value.trim()){nm.focus();nm.style.borderColor='var(--bad)';return}buildTest(nm.value);test()};
+    vb.onclick=()=>{vr.innerHTML=verify(vt.value)};
+    return;
+  }
+  // results
+  if(T.done){
+    const r=T.result,pct=Math.round(r.right/r.total*100),pass=pct>=TEST.pass;
+    app.innerHTML=`<div class="card done"><div class="small">${esc(T.name)} · ${esc(r.date)}</div>
+      <div class="big">${pct}%</div><div class="pf" style="color:${pass?'var(--ok)':'var(--bad)'}">${pass?'PASS':'FAIL'}</div>
+      <p>${r.right} of ${r.total} correct · ${r.mins} min${r.timedOut?' · time ran out':''}</p>
+      <div class="small">Check code <b style="font-size:18px;color:var(--ink)">${r.code}</b></div>
+      <div id="sendst" style="margin-top:10px;font-weight:700">${sendStatus()}</div></div>
+      ${TEST.showMissed&&r.missed.length?`<div class="card panel"><div class="body"><b>Missed</b>${r.missed.map(n=>{const q=T.qs.find(q=>q.n===n);return `<div class="li" style="margin:8px 0 0">${byN[n].img?`<img src="${byN[n].img}">`:'<div class="np">no photo</div>'}<div><div class="t">#${n} ${esc(byN[n].name)}</div><div class="d">Answered: ${q.pick?esc(byN[q.pick].name):'(no answer)'}</div></div></div>`}).join('')}</div></div>`:''}
+      <div class="res" id="rt">${esc(resultText())}</div>
+      <div class="row"><button class="btn b" id="cp">Copy results</button><button class="btn" id="nw">Finish</button></div>
+      <p class="small" style="text-align:center">If it didn't send, copy and text/email this to your instructor, or show them this screen.</p>`;
+    cp.onclick=async()=>{try{await navigator.clipboard.writeText(resultText());cp.textContent='Copied ✓'}catch(e){const s=getSelection(),rg=document.createRange();rg.selectNodeContents(rt);s.removeAllRanges();s.addRange(rg);cp.textContent='Selected — copy it'}};
+    if(!app._rs){app._rs=1;app.addEventListener('click',e=>{if(e.target.id==='rs2'){T.result.sendFail=false;sendst.innerHTML=sendStatus();submitResult()}})}
+    let a=false;nw.onclick=()=>{if(!a){a=true;nw.textContent='Tap again — clears this screen';nw.classList.add('r');return}T.ack=true;saveT();test()};
+    return;
+  }
+  // question
+  if(TEST.minutes&&timeLeft()===0)return finishTest();
+  const q=T.qs[T.i],d=byN[q.n],last=T.i===T.qs.length-1;
+  const prompt=q.t==='photo'?`<div class="ph">${photo(d)}</div><div class="qtext">What is this?</div>`
+    :`<div class="qtext">Which item does this?<br><span style="font-weight:400">“${esc(d.fn)}”</span></div>`;
+  app.innerHTML=`<div class="score"><span>${esc(T.name)} · Q ${T.i+1}/${T.qs.length}</span><span id="tm">${TEST.minutes?fmt(timeLeft()):''}</span></div>
+    <div class="bar"><i style="width:${T.i/T.qs.length*100}%"></i></div>
+    <div class="card">${prompt}</div>
+    <div class="opts">${q.opts.map(o=>`<button class="opt ${q.pick===o?'sel':''}" data-n="${o}">${esc(byN[o].name)}</button>`).join('')}</div>
+    <div class="row"><button class="btn ${last?'g':'p'}" id="nq" ${q.pick?'':'disabled style="opacity:.45"'}>${last?(armSubmit?'Tap again to submit':'Submit test'):'Next ▶'}</button></div>`;
+  app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{q.pick=+b.dataset.n;armSubmit=false;saveT();test()});
+  nq.onclick=()=>{if(!q.pick)return;if(last){if(!armSubmit){armSubmit=true;test();return}armSubmit=false;finishTest()}else{T.i++;saveT();test();window.scrollTo(0,0)}};
+  if(TEST.minutes&&!tick)tick=setInterval(()=>{const l=timeLeft(),el=document.getElementById('tm');if(el)el.textContent=fmt(l);if(l===0)finishTest()},1000);
+}
+function verify(txt){
+  const g=re=>(txt.match(re)||[])[1];
+  const name=g(/Name:\s*(.+)/),date=g(/Date:\s*(.+)/),sc=txt.match(/Score:\s*(\d+)\/(\d+)/),code=g(/Check code:\s*([A-Z0-9]+)/),mline=g(/Missed:\s*(.+)/);
+  if(!name||!date||!sc||!code||!mline)return '<span style="color:var(--bad)">Couldn\'t read that — paste the whole results text.</span>';
+  const missed=mline.trim()==='none'?[]:[...mline.matchAll(/#(\d+)/g)].map(m=>+m[1]);
+  const ok=fnv(canon(name,date.trim(),+sc[1],+sc[2],missed))===code.trim();
+  return ok?`<span style="color:var(--ok)">✓ Valid — ${esc(name)} scored ${sc[1]}/${sc[2]}. Not edited.</span>`
+    :'<span style="color:var(--bad)">✗ Does not match — the name, date, score or missed list was changed.</span>';
+}
+
+const V={cards,quiz,board,list,test};
+const show=v=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.v===v));if(v!=='test'){clearInterval(tick);tick=null}V[v]();window.scrollTo(0,0)};
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>show(b.dataset.v));
+function route(){const t=location.hash==='#test';document.body.classList.toggle('testonly',t);if(t||(T&&!T.done))show('test');else show('cards')}
+window.addEventListener('hashchange',route);
+updProg();route();if(T&&T.done&&T.result&&!T.result.sent)submitResult();
+</script>
+</body>
+</html>
