@@ -98,14 +98,17 @@ details summary{list-style:none;cursor:pointer;color:var(--mut)}
 .stat b{display:block;font:800 24px var(--hd);color:var(--acc)}.stat span{font:700 11px var(--hd);letter-spacing:1px;color:var(--mut);text-transform:uppercase}
 .lt{font:800 64px/1 var(--hd);color:var(--hv);text-align:center;text-shadow:0 0 20px #e8ff2e66}
 .lt.low{color:var(--bad);text-shadow:0 0 20px #ff4d4d88}
+.boards{display:flex;gap:8px;max-width:760px;margin:10px auto 0;padding:0 14px}.boards a{flex:1;text-align:center;text-decoration:none;font:800 15px var(--hd);letter-spacing:1px;text-transform:uppercase;color:var(--mut);background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:8px}.boards a.on{color:#111;background:var(--hv);border-color:var(--hv)}
+body.testonly .boards,body.intest .boards{display:none}
 </style>
 </head>
 <body>
 <header><div class="brand"><div class="bolt">⚡</div><div><h1>URD <span>Systems ID</span></h1><div class="rank" id="rank"></div></div></div><div class="prog" id="prog"></div></header>
 <div class="xp"><i id="xpb"></i></div><div class="haz"></div>
+<div class="boards"><a href="./" class="on">URD</a><a href="transmission/">Transmission</a></div>
 <main id="app"></main>
 <form name="test-results" data-netlify="true" netlify-honeypot="bot-field" hidden>
-  <input name="bot-field"><input name="student"><input name="date"><input name="score"><input name="percent"><input name="result"><input name="minutes"><input name="missed"><input name="check-code">
+  <input name="bot-field"><input name="board"><input name="student"><input name="date"><input name="score"><input name="percent"><input name="result"><input name="minutes"><input name="missed"><input name="check-code">
 </form>
 <nav>
   <button data-v="cards" class="on"><b>🂠</b>Flashcards</button>
@@ -115,6 +118,7 @@ details summary{list-style:none;cursor:pointer;color:var(--mut)}
   <button data-v="test"><b>✎</b>Test</button>
 </nav>
 <script>
+const BOARD='URD Systems ID',KEY='urd';
 // ===== EDIT ITEMS HERE: [number, name, what it does, field tip] =====
 const ITEMS = [
  [1,"5/16 Allen Wrench","Hex key for set screws on secondary connector blocks and other URD hardware.","Snug set screws to spec — loose ones heat up and burn connections."],
@@ -167,9 +171,9 @@ const POS={1:[3.5,23.3],2:[9,25.9],3:[14.5,27.4],4:[6.4,54.5],5:[13.6,45.2],6:[1
 const D=ITEMS.map(([n,name,fn,tip])=>({n,name,fn,tip,img:n in POS?`img/${n}.jpg`:null}));
 const byN=Object.fromEntries(D.map(d=>[d.n,d]));
 const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
-let known=new Set(store.get('urd_known',[]));
-const saveKnown=()=>{store.set('urd_known',[...known]);updProg()};
-const RANKS=[[0,'Groundhand'],[9,'1st Step Apprentice'],[18,'2nd Step Apprentice'],[27,'3rd Step Apprentice'],[35,'4th Step Apprentice'],[43,'Journeyman']];
+let known=new Set(store.get(KEY+'_known',[]));
+const saveKnown=()=>{store.set(KEY+'_known',[...known]);updProg()};
+const RANKS=[[0,'Groundhand'],[.2,'1st Step Apprentice'],[.4,'2nd Step Apprentice'],[.6,'3rd Step Apprentice'],[.8,'4th Step Apprentice'],[1,'Journeyman']].map(([f,n])=>[Math.ceil(f*D.length),n]);
 let lastRank=null;
 const rankIdx=k=>{let r=0;RANKS.forEach(([t],i)=>{if(k>=t)r=i});return r};
 function updProg(){const k=known.size,ri=rankIdx(k),$=id=>document.getElementById(id);
@@ -257,7 +261,7 @@ function quiz(){
 // ===== LIGHTNING ROUND =====
 let LQ=null,ltick=null;const LSEC=60;
 function lightning(head){
-  const best=store.get('urd_ltbest',0);
+  const best=store.get(KEY+'_ltbest',0);
   if(!LQ||LQ.over){
     app.innerHTML=head+`<div class="card hero"><div class="kick">60-SECOND LIGHTNING ROUND</div>
       <div class="ttl">${LQ?.over?LQ.score+' correct':'How many can you ID?'}</div>
@@ -280,8 +284,8 @@ function lightning(head){
   if(!ltick)ltick=setInterval(()=>{if(!LQ||LQ.over){clearInterval(ltick);ltick=null;return}
     const l=Math.max(0,LQ.end-Date.now()),el=document.getElementById('ltm');
     if(el){el.textContent=Math.ceil(l/1000);el.classList.toggle('low',l<10000)}
-    if(l<=0){clearInterval(ltick);ltick=null;LQ.over=true;const b=store.get('urd_ltbest',0);LQ.newBest=LQ.score>b;
-      if(LQ.newBest){store.set('urd_ltbest',LQ.score);toast('New best · '+LQ.score);burst(innerWidth/2,innerHeight/3,30)}
+    if(l<=0){clearInterval(ltick);ltick=null;LQ.over=true;const b=store.get(KEY+'_ltbest',0);LQ.newBest=LQ.score>b;
+      if(LQ.newBest){store.set(KEY+'_ltbest',LQ.score);toast('New best · '+LQ.score);burst(innerWidth/2,innerHeight/3,30)}
       if(qMode==='lightning'&&document.querySelector('nav button.on')?.dataset.v==='quiz')lightning(head)}},200);
 }
 function lNext(){if(LQ.k>=LQ.pool.length){LQ.pool=shuf(LQ.pool);LQ.k=0}LQ.cur=LQ.pool[LQ.k++];
@@ -303,7 +307,7 @@ function board(){
   app.innerHTML=`<div class="seg"><button id="ex" class="${B.mode==='explore'?'on':''}">Explore</button><button id="fd" class="${B.mode==='find'?'on':''}">Find it</button><button id="zm" class="${B.zoom?'on':''}">${B.zoom?'Zoom out':'Zoom in'}</button></div>
   ${B.mode==='explore'?`<label class="chk"><input type="checkbox" id="hn" ${B.hideNums?'checked':''}> Hide numbers</label>`:''}
   ${B.mode==='find'?panel:''}
-  <div class="${B.zoom?'zoomwrap':''}"><div class="board"><img src="img/board.jpg" alt="URD board">${hs}</div></div>
+  <div class="${B.zoom?'zoomwrap':''}"><div class="board"><img src="img/board.jpg" alt="${BOARD} board">${hs}</div></div>
   ${B.mode==='explore'?panel:''}`;
   ex.onclick=()=>{B.mode='explore';B.sel=null;board()};
   fd.onclick=()=>{B.mode='find';B.target=null;B.res=null;B.right=0;B.tries=0;board()};
@@ -330,11 +334,11 @@ function list(){
 // ===== TEST =====
 // questions: how many items (43 = whole board). type: 'mixed' | 'photo' | 'fn'. minutes: 0 = no time limit.
 const TEST={questions:43,type:'mixed',pass:80,minutes:30,showMissed:true};
-const SALT='NLC-URD-ID';
+const SALT='NLC-'+KEY.toUpperCase()+'-ID';
 const fnv=s=>{let h=0x811c9dc5;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,0x01000193)>>>0}return h.toString(36).toUpperCase().padStart(7,'0').slice(-7)};
 const canon=(name,date,right,total,missed)=>`${SALT}|${name.trim().toLowerCase()}|${date}|${right}/${total}|${[...missed].sort((a,b)=>a-b).join(',')}`;
-let T=store.get('urd_test',null),tick=null,armSubmit=false;
-const saveT=()=>store.set('urd_test',T);
+let T=store.get(KEY+'_test',null),tick=null,armSubmit=false;
+const saveT=()=>store.set(KEY+'_test',T);
 function buildTest(name){
   const ns=shuf(D.map(d=>d.n)).slice(0,Math.min(TEST.questions,D.length));
   const qs=ns.map(n=>{let t=TEST.type;if(t==='mixed')t=byN[n].img&&Math.random()<.65?'photo':'fn';if(t==='photo'&&!byN[n].img)t='fn';
@@ -355,7 +359,7 @@ function finishTest(){
 async function submitResult(){
   if(!T||!T.result||T.result.sent)return;
   const r=T.result,pct=Math.round(r.right/r.total*100);
-  const body=new URLSearchParams({'form-name':'test-results',student:T.name,date:r.date,score:`${r.right}/${r.total}`,percent:pct+'%',
+  const body=new URLSearchParams({'form-name':'test-results',board:BOARD,student:T.name,date:r.date,score:`${r.right}/${r.total}`,percent:pct+'%',
     result:pct>=TEST.pass?'PASS':'FAIL',minutes:String(r.mins),missed:r.missed.map(n=>'#'+n+' '+byN[n].name).join('; ')||'none','check-code':r.code});
   try{const res=await fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body.toString()});
     r.sent=res.ok;r.sendFail=!res.ok}catch(e){r.sendFail=true}
@@ -365,7 +369,7 @@ const sendStatus=()=>T.result.sent?'<span style="color:var(--ok)">✓ Sent to yo
   :T.result.sendFail?'<span style="color:var(--bad)">Not sent (no signal?) </span><button class="btn b" id="rs2" style="flex:none;padding:6px 12px;font-size:14px">Retry</button>':'Sending to instructor…';
 function resultText(){
   const r=T.result,pct=Math.round(r.right/r.total*100);
-  return `URD SYSTEMS ID TEST
+  return `${BOARD.toUpperCase()} TEST
 Name: ${T.name}
 Date: ${r.date}
 Score: ${r.right}/${r.total} (${pct}%) ${pct>=TEST.pass?'PASS':'FAIL'}
@@ -377,7 +381,7 @@ function test(){
   document.body.classList.toggle('intest',!!(T&&!T.done));
   // start screen
   if(!T||(T.done&&T.ack)){
-    app.innerHTML=`<div class="card"><div class="hero"><div class="kick">CERTIFICATION CHECK</div><div class="ttl">URD Systems ID Test</div>
+    app.innerHTML=`<div class="card"><div class="hero"><div class="kick">CERTIFICATION CHECK</div><div class="ttl">${BOARD} Test</div>
       <div class="stats"><div class="stat"><b>${Math.min(TEST.questions,D.length)}</b><span>Questions</span></div><div class="stat"><b>${TEST.minutes||'∞'}</b><span>Minutes</span></div><div class="stat"><b>${TEST.pass}%</b><span>To pass</span></div></div></div><div class="body">
       <p class="small">No hints, no going back, no answers shown until the end. Pick an answer, then tap Next.</p>
       <input class="txt" id="nm" placeholder="Your full name" autocomplete="name">
