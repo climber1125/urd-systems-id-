@@ -108,7 +108,7 @@ body.testonly .boards,body.intest .boards{display:none}
 <div class="boards"><a href="../">URD</a><a href="../transmission/">Trans 1</a><a href="./" class="on">Trans 2</a><a href="../tools/">Tools</a><a href="../distribution/">Distribution</a><a href="../distbonus/">Dist Bonus</a></div>
 <main id="app"></main>
 <form name="test-results" data-netlify="true" netlify-honeypot="bot-field" hidden>
-  <input name="bot-field"><input name="board"><input name="student"><input name="date"><input name="score"><input name="percent"><input name="result"><input name="minutes"><input name="missed"><input name="check-code">
+  <input name="bot-field"><input name="board"><input name="unlocked"><input name="student"><input name="date"><input name="score"><input name="percent"><input name="result"><input name="minutes"><input name="missed"><input name="check-code">
 </form>
 <nav>
   <button data-v="cards" class="on"><b>🂠</b>Flashcards</button>
@@ -334,7 +334,7 @@ function finishTest(){
 async function submitResult(){
   if(!T||!T.result||T.result.sent)return;
   const r=T.result,pct=Math.round(r.right/r.total*100);
-  const body=new URLSearchParams({'form-name':'test-results',board:BOARD,student:T.name,date:r.date,score:`${r.right}/${r.total}`,percent:pct+'%',
+  const body=new URLSearchParams({'form-name':'test-results',board:BOARD,unlocked:T.unlocked?'PIN verified':'NOT verified',student:T.name,date:r.date,score:`${r.right}/${r.total}`,percent:pct+'%',
     result:pct>=TEST.pass?'PASS':'FAIL',minutes:String(r.mins),missed:r.missed.map(n=>'#'+n+' '+byN[n].name).join('; ')||'none','check-code':r.code});
   try{const res=await fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body.toString()});
     r.sent=res.ok;r.sendFail=!res.ok}catch(e){r.sendFail=true}
@@ -360,11 +360,21 @@ function test(){
       <div class="stats"><div class="stat"><b>${Math.min(TEST.questions,D.length)}</b><span>Questions</span></div><div class="stat"><b>${TEST.minutes||'∞'}</b><span>Minutes</span></div><div class="stat"><b>${TEST.pass}%</b><span>To pass</span></div></div></div><div class="body">
       <p class="small">No hints, no going back, no answers shown until the end. Pick an answer, then tap Next.</p>
       <input class="txt" id="nm" placeholder="Your full name" autocomplete="name">
+      <input class="txt" id="pin" placeholder="Instructor PIN" inputmode="numeric" autocomplete="off" type="password" maxlength="12">
+      <div id="pinmsg" class="small" style="min-height:18px;color:var(--bad);font-weight:700"></div>
       <button class="btn p" id="go" style="width:100%">Begin test</button></div></div>
       <details class="card panel"><summary class="body" style="font-weight:700">Instructor: verify a result</summary><div class="body" style="padding-top:0">
       <p class="small">Paste the results text a student sent you.</p><textarea id="vt"></textarea>
       <button class="btn b" id="vb" style="width:100%;margin-top:8px">Check</button><div id="vr" style="margin-top:10px;font-weight:700"></div></div></details>`;
-    go.onclick=()=>{if(!nm.value.trim()){nm.focus();nm.style.borderColor='var(--bad)';return}buildTest(nm.value);test()};
+    go.onclick=async()=>{if(!nm.value.trim()){nm.focus();nm.style.borderColor='var(--bad)';return}
+      if(!pin.value.trim()){pin.focus();pin.style.borderColor='var(--bad)';pinmsg.textContent='Get the PIN from your instructor.';return}
+      go.disabled=true;go.textContent='Checking PIN…';pinmsg.textContent='';
+      let ok=false,net=true;
+      try{const r=await fetch('/.netlify/functions/verify-pin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin:pin.value.trim(),board:BOARD,student:nm.value.trim()})});
+        if(!r.ok)throw 0;ok=(await r.json()).ok===true}catch(e){net=false}
+      if(ok){buildTest(nm.value);T.unlocked=true;saveT();test();return}
+      go.disabled=false;go.textContent='Begin test';pin.value='';
+      pinmsg.textContent=net?'Wrong PIN. Check with your instructor.':'Needs a signal to unlock the test. Try again with service.';buzz([70,40,70])};
     vb.onclick=()=>{vr.innerHTML=verify(vt.value)};
     return;
   }
